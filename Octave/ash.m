@@ -1,4 +1,4 @@
-## Copyright (C) 2020 Windows
+## Copyright (C) 2020 Otavio Beruski
 ## 
 ## This program is free software: you can redistribute it and/or modify it
 ## under the terms of the GNU General Public License as published by
@@ -15,23 +15,35 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*- 
-## @deftypefn {} {@var{retval} =} ash (@var{y},@var{t},@var{h},@var{m})
+## @deftypefn {} {[@var{ret2} @var{ret1}] =} ash (@var{y},@var{t},@var{h},@var{m})
 ##
+## Estimates the probability distribution of a dataset @var{y} using the
+## Averaged Shifted Histogram (ASH) method. The data is analyzed between the
+## intervals set by @var{t}: [t(1) t(2)), with @var{h} evenly spaced intervals. 
+## The number of shifts and histograms to be averaged over is given by @var{m},
+## with the weights given simply by the triangular kernel (see ref. [1]).
+## The function returns the unnormalized PDF estimate @var{f} and optionally
+## the limits of the bins used.
+##
+## [1] Scott, D.W., Averaged shifted histogram. WIREs Comp. Stat., 2:160-164,
+## 2010. Available at:
+## https://www.researchgate.net/publication/229760716_Averaged_Shifted_Histogram
+## 
 ## @seealso{histc}
 ## @end deftypefn
 
 ## Author: Otavio Beruski
 ## Created: 2020-04-27
 
-function [retval] = ash (y,t,h,m)
+function [ret1 ret2] = ash (y,t,h,m)
 
-    L = length(y);
-    uy = t(2);
-    ly = t(1);
-    d = h/m;
-    f = zeros(ceil(m*(uy-ly)/h),1);
-    nu = zeros(2,1);
-    nu0 = 0;
+    L = length(y);                      % Length of the data set
+    uy = t(2);                          % Upper range limit
+    ly = t(1);                          % Lower range limit
+    d = h/m;                            % Increment in bin size
+    f = zeros(ceil(m*(uy-ly)/h),1);     % Final frequency array
+    nu = zeros(2,1);                    % Frequency for each h/m subinterval
+    nu0 = 0;                            % Averaged shifted frequency in a bin
 
     k = 1;
     x = ly;
@@ -48,5 +60,6 @@ function [retval] = ash (y,t,h,m)
         x = x + d;
     endwhile
 
-    retval = f;
+    ret1 = f;
+    ret2 = linspace(ly,uy,length(f))';
 endfunction
